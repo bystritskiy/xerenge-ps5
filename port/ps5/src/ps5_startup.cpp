@@ -102,8 +102,7 @@ namespace ps5::startup
                      relativeResult ? std::strerror(errno) : "ok");
         FindCode();
 
-        // The offscreen driver with the VideoOut WSI; a hint, not setenv
-        // (ps5-knowledge/native-ports.md, NFSU1).
+        // The offscreen driver with the VideoOut WSI; a hint, not setenv.
         SDL_SetHint(SDL_HINT_VIDEO_DRIVER, "offscreen");
         SDL_SetHint(SDL_HINT_AUDIO_DRIVER, "ps5");
 

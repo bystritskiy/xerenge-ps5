@@ -1,0 +1,15 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 1cb5551..df96b79 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -14,6 +14,10 @@ if(APPLE)
+ endif()
+ 
+ string(COMPARE EQUAL ${CMAKE_SYSTEM_NAME} "Linux" IS_LINUX)
++# The PS5 draws through SDL's offscreen driver and its VideoOut WSI.
++if(XERENGE_PS5)
++    set(IS_LINUX TRUE)
++endif()
+ 
+ # Project options
+ include(CMakeDependentOption)

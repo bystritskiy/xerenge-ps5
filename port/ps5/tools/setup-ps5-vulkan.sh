@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SpeedBreaker PS5: the console toolchain the build links against, into
+# Xerenge PS5: the console toolchain the build links against, into
 # build/ps5-deps (ignored), at the revisions this port is tested with:
 #   - mihawk-99/PS5_Vulkan, and in its .deps the payload SDK (PS5_PayloadSDK),
 #     RADV release (PS5_Mesa) and the clean-room runtime/libc.prx
@@ -21,7 +21,7 @@ PS5_MESA_REV=1ba9874f478657ccf6da72ce55f0260164cc0bd0       # Mesa 26.2.0 with t
 PS5_SDK_REV=b83202be73e930050e00de0f1b4d9ec46c0391bf        # payload SDK v0.42 with the platform layer
 CRT_VERSION=1:18.1.3-1ubuntu1
 CRT_SHA256=52f850cf79b9cda0b00b78aa2fed86bae6947e596cc7cafb52dba4fd88acb07d
-IMAGE=speedbreaker-ps5-builder:local
+IMAGE=xerenge-ps5-builder:local
 mkdir -p "$DEPS"
 docker info > /dev/null || { echo "Docker is needed (Docker Desktop or colima)" >&2; exit 2; }
 

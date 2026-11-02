@@ -13,7 +13,7 @@
 #   NATIVE_TOOL   ps5-native-tool (built from PS5_Vulkan/tooling/native if unset)
 #   TITLE_ID      PPSA92006 by default (port/ps5/sce_sys/param.json)
 #
-# The recipe is PS5_Vulkan's (tools/radv-link.sh), as in SpeedBreaker's port:
+# The recipe is PS5_Vulkan's (tools/radv-link.sh):
 # the app's CRT, the AGC import stubs, RADV whole, libc++/libc++abi/libunwind,
 # the platform layer's libc, the SDK's module stubs; then ps5-native-tool
 # converts the PIE to the PS5 layout and signs it as a development FSELF.
@@ -121,7 +121,8 @@ mkdir -p "$APP/sce_sys" "$APP/sce_module" "$APP/licenses"
 "$NATIVE_TOOL" self --sign --in "$WORK/eboot.elf" --out "$APP/eboot.bin" --magic 0x1D3D154F > "$WORK/sign.log"
 cp "$PS5_VULKAN/runtime/libc.prx" "$APP/sce_module/libc.prx"
 cp "$ROOT/port/ps5/sce_sys/"* "$APP/sce_sys/"
-cp "$ROOT/LICENSE" "$APP/licenses/"
+cp "$ROOT/LICENSE" "$ROOT/port/ps5/THIRD_PARTY_NOTICES.md" "$APP/licenses/"
+cp -R "$ROOT/port/ps5/LICENSES" "$APP/licenses/LICENSES"
 echo "Xerenge $(cat "$ROOT/VERSION") ($(git -C "$ROOT" rev-parse --short HEAD)), PS5" > "$APP/VERSION"
 for file in "$APP/eboot.bin" "$APP/sce_module/libc.prx"; do
     "$NATIVE_TOOL" self --inspect --file "$file" > "$WORK/$(basename "$file")-inspect.txt"

@@ -1,4 +1,4 @@
-# SpeedBreaker PS5: the Linux tools PS5_Vulkan's RADV, payload SDK and
+# Xerenge PS5: the Linux tools PS5_Vulkan's RADV, payload SDK and
 # clean-room libc builds need (port/ps5/tools/setup-ps5-vulkan.sh runs them in
 # it; nothing of this image ends up in the app).
 FROM ubuntu:24.04

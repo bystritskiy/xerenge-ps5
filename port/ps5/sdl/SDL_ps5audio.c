@@ -1,4 +1,4 @@
-/* SpeedBreaker PS5: an SDL3 audio driver for the console's AudioOut, zlib
+/* Xerenge PS5: an SDL3 audio driver for the console's AudioOut, zlib
  * (SDL's licence). Playback only: one S16 stereo 48 kHz port of the system
  * user.
  * sceAudioOutOutput blocks until the port takes the buffer (one grain, about

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""SpeedBreaker PS5: the Vulkan loader's exports, for a statically linked RADV.
+"""Xerenge PS5: the Vulkan loader's exports, for a statically linked RADV.
 
     python3 -I port/ps5/tools/gen-vulkan-shim.py <vulkan_core.h> <out.c>
 

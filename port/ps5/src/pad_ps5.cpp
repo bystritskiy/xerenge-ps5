@@ -5,8 +5,7 @@
 // one SDL virtual gamepad, so the runtime's input (hid/input.cpp) sees an
 // ordinary controller: buttons and axes are set in the virtual joystick's
 // Update, which SDL calls while it updates joysticks, and rumble goes to
-// scePadSetVibration. Options is Start and the touchpad click is Back, so
-// Back + Start opens SpeedBreaker's settings as on any controller.
+// scePadSetVibration. Options is Start and the touchpad click is Back.
 //
 // One player, the initial user's pad, reopened a second after it fails (a
 // pad switched off or reconnected).

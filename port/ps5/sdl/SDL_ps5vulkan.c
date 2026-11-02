@@ -1,4 +1,4 @@
-/* SpeedBreaker PS5: a Vulkan WSI for SDL's offscreen window host, MIT.
+/* Xerenge PS5: a Vulkan WSI for SDL's offscreen window host, MIT.
  * The display is real: VK_KHR_display is provided by RADV's PS5 VideoOut WSI.
  * SDL's loader is seeded from the statically linked ICD, without dlopen. */
 #include "SDL_internal.h"

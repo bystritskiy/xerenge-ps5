@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SpeedBreaker PS5: a bin folder with Homebrew's llvm@18 tools and Homebrew's lld
+# Xerenge PS5: a bin folder with Homebrew's llvm@18 tools and Homebrew's lld
 # (llvm@18 has no ld.lld), and an llvm-config that names it as --bindir, for
 # the payload SDK's prospero-* wrappers. Prints the llvm-config to export:
 #

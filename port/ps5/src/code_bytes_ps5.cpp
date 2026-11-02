@@ -2,8 +2,7 @@
 //
 // The SDK's MMIO handler decodes the instruction that faulted, and eboot code
 // is execute-only on the console: reading it faults as well. The same bytes are
-// in /app0/eboot.bin, the SELF entry of segment 0, stored plain (reSOT's
-// port/ps5/src/mmio_ps5.c found this). reSOT keeps a copy of the segment; an
+// in /app0/eboot.bin, the SELF entry of segment 0, stored plain. An
 // instruction read with pread costs no memory, and pread is safe in the handler.
 //
 // ps5-native-tool writes the PS4 FSELF magic 0x1D3D154F; fPKG builders rewrite

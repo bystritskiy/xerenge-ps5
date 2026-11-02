@@ -10,6 +10,10 @@ Revenge (USA) - both officially, tested end to end: menus, races, Crash mode,
 replays, widescreen and the logo skip. Other dumps (the beta, other regions)
 are not.
 
+**On a PS5.** A native app for a homebrew-enabled PS5 (title PPSA92006), for
+the USA disc: [`port/ps5/README.md`](port/ps5/README.md) has how to install it,
+with the Russian translation, and how it is built.
+
 ## Getting it running
 
 You need a dump of the retail European or American release - the image

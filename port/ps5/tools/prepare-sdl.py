@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""SpeedBreaker PS5: patch a clean SDL 3.4.18 checkout for the console.
+"""Xerenge PS5: patch a clean SDL 3.4.18 checkout for the console.
 
     python3 -I port/ps5/tools/prepare-sdl.py <SDL source>
 
@@ -20,7 +20,7 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 SDL_REVISION = '829a65d769d935c4852f8159e964312c0957260a'  # release-3.4.18
-MARK = 'SpeedBreaker PS5'
+MARK = 'Xerenge PS5'
 
 
 def patch(path, old, new, count=1):
