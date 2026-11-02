@@ -1630,17 +1630,39 @@ bool RebuildSongManager(const uint8_t* data, size_t data_size, const uint8_t* co
 }
 
 // The constant file's size: up to the end of its last string.
+//
+// sub_824277A0 is called for every animation, not only the ones this hook
+// knows: the empty-name loads at boot pass data that is no package at all, and
+// a constant file is not a pointer the title promises to be readable for as
+// long as its own last string says. Check the header and keep every offset
+// inside kLimit, so a movie this hook does not know cannot take the game down.
 size_t ConstantsSize(const uint8_t* raw) {
+  constexpr uint32_t kLimit = 0x40000;
+  static constexpr char kMagic[] = "Apt constant file";
+  if (std::memcmp(raw, kMagic, sizeof(kMagic) - 1) != 0) {
+    return 0;
+  }
   Blob header;
   header.bytes.assign(raw, raw + 32);
   const uint32_t count = header.U32(24);
+  if (count > (kLimit - 32) / 8) {
+    return 0;
+  }
   size_t end = 32 + size_t(count) * 8;
   for (uint32_t i = 0; i < count; ++i) {
     const uint8_t* entry = raw + 32 + i * 8;
     const uint32_t type = uint32_t(entry[0]) << 24 | uint32_t(entry[1]) << 16 | uint32_t(entry[2]) << 8 | entry[3];
     if (type == 1) {
       const uint32_t at = uint32_t(entry[4]) << 24 | uint32_t(entry[5]) << 16 | uint32_t(entry[6]) << 8 | entry[7];
-      end = std::max(end, at + std::strlen(reinterpret_cast<const char*>(raw + at)) + 1);
+      if (at >= kLimit) {
+        return 0;
+      }
+      const size_t left = kLimit - at;
+      const size_t length = ::strnlen(reinterpret_cast<const char*>(raw + at), left);
+      if (length == left) {
+        return 0;
+      }
+      end = std::max(end, size_t(at) + length + 1);
     }
   }
   return end;
@@ -1660,28 +1682,25 @@ REX_HOOK_RAW(sub_824277A0) {
   if (data && constants > data && constants - data <= 0x40000) {
     const uint8_t* raw_data = xerenge::GuestPointer(base, data);
     const size_t data_size = constants - data;
+    const uint8_t* raw_constants = xerenge::GuestPointer(base, constants);
+    const size_t constants_size = ConstantsSize(raw_constants);
     // Driver Details > Settings, or the race's pause menu's Options.
     const bool settings = Holds(raw_data, data_size, "__Packages.DriverDetailsSettingsClass");
     const bool pause = !settings && Holds(raw_data, data_size, "__Packages.PauseOptionsMenu");
     // The main menu: Quit B beside Continue A.
     if (!settings && !pause && Holds(raw_data, data_size, "__Packages.MainMenu")) {
-      const uint8_t* raw_constants = xerenge::GuestPointer(base, constants);
       Blob new_data, new_constants;
-      if (RebuildMainMenu(raw_data, data_size, raw_constants, ConstantsSize(raw_constants), new_data,
-                          new_constants)) {
+      if (RebuildMainMenu(raw_data, data_size, raw_constants, constants_size, new_data, new_constants)) {
         ctx.r4.u64 = ToGuest(base, new_data);
         ctx.r5.u64 = ToGuest(base, new_constants);
         REXLOG_INFO("menu: main menu movie rebuilt");
       }
     }
     // Driver Details > Song Manager: LT switches to the music folder, RT the order.
-    const uint8_t* song_constants = xerenge::GuestPointer(base, constants);
-    if (!settings && !pause && Holds(song_constants, ConstantsSize(song_constants), "togglePlayOrder") &&
-        Holds(song_constants, ConstantsSize(song_constants), "changeCustomPlaylist")) {
-      const uint8_t* raw_constants = song_constants;
+    if (!settings && !pause && constants_size && Holds(raw_constants, constants_size, "togglePlayOrder") &&
+        Holds(raw_constants, constants_size, "changeCustomPlaylist")) {
       Blob new_data, new_constants;
-      if (RebuildSongManager(raw_data, data_size, raw_constants, ConstantsSize(raw_constants), new_data,
-                             new_constants)) {
+      if (RebuildSongManager(raw_data, data_size, raw_constants, constants_size, new_data, new_constants)) {
         ctx.r4.u64 = ToGuest(base, new_data);
         ctx.r5.u64 = ToGuest(base, new_constants);
         REXLOG_INFO("menu: song manager movie rebuilt");
@@ -1691,10 +1710,8 @@ REX_HOOK_RAW(sub_824277A0) {
     // Driver Details > Stats's movie, asked for by that button: the achievements.
     if (!settings && !pause && xerenge::settings::CurrentPage() == xerenge::settings::kAchievements &&
         Holds(raw_data, data_size, "__Packages.DriverDetailsStats")) {
-      const uint8_t* raw_constants = xerenge::GuestPointer(base, constants);
       Blob new_data, new_constants;
-      if (RebuildAchievements(raw_data, data_size, raw_constants, ConstantsSize(raw_constants), new_data,
-                              new_constants)) {
+      if (RebuildAchievements(raw_data, data_size, raw_constants, constants_size, new_data, new_constants)) {
         ctx.r4.u64 = ToGuest(base, new_data);
         ctx.r5.u64 = ToGuest(base, new_constants);
         REXLOG_INFO("menu: achievements movie rebuilt: data {:X} -> {:X} bytes", data_size,
@@ -1704,10 +1721,8 @@ REX_HOOK_RAW(sub_824277A0) {
     // Driver Details > Player File: the ACHIEVEMENTS button.
     if (!settings && !pause && Holds(raw_data, data_size, "DriverDetailsProfile") &&
         Holds(raw_data, data_size, "new_btn")) {
-      const uint8_t* raw_constants = xerenge::GuestPointer(base, constants);
       Blob new_data, new_constants;
-      if (RebuildProfile(raw_data, data_size, raw_constants, ConstantsSize(raw_constants), new_data,
-                         new_constants)) {
+      if (RebuildProfile(raw_data, data_size, raw_constants, constants_size, new_data, new_constants)) {
         ctx.r4.u64 = ToGuest(base, new_data);
         ctx.r5.u64 = ToGuest(base, new_constants);
         REXLOG_INFO("menu: player file movie rebuilt: data {:X} -> {:X} bytes", data_size,
@@ -1715,12 +1730,11 @@ REX_HOOK_RAW(sub_824277A0) {
       }
     }
     if (settings || pause) {
-      const uint8_t* raw_constants = xerenge::GuestPointer(base, constants);
       Blob new_data, new_constants;
       // The American release (a byte of its image that differs from the European
       // one's: 0 there, 1 here) has one language.
       xerenge::settings::SetSingleLanguage(*xerenge::GuestPointer(base, 0x825F7632) == 0);
-      if (Rebuild(raw_data, data_size, raw_constants, ConstantsSize(raw_constants), pause, new_data, new_constants)) {
+      if (Rebuild(raw_data, data_size, raw_constants, constants_size, pause, new_data, new_constants)) {
         // Kept for as long as the movie may run: a screen's worth, not freed.
         ctx.r4.u64 = ToGuest(base, new_data);
         ctx.r5.u64 = ToGuest(base, new_constants);

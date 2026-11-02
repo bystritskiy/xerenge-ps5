@@ -37,6 +37,9 @@ set(BURNOUT_SOURCES
 
 if(WIN32)
     add_executable(burnout WIN32 ${BURNOUT_SOURCES})
+elseif(XERENGE_PS5)
+    # Compiled here, linked with RADV and signed by port/ps5/tools/link.sh.
+    add_library(burnout STATIC ${BURNOUT_SOURCES})
 elseif(ANDROID)
     # SDLActivity loads the game and calls its SDL_main: libmain_eu.so, made
     # from the European release's default.xex, or libmain_us.so from the
@@ -137,7 +140,7 @@ endif()
 
 # What the renderer needs from each translated shader's HLSL, read at build
 # time into a table (shader_source_info.h), so the sources are not shipped.
-add_executable(shader_source_info_gen
+add_executable(shader_source_info_gen EXCLUDE_FROM_ALL
     tools/shader_source_info_gen.cpp
     src/plume_renderer/shader_source_info.cpp
 )
@@ -193,7 +196,12 @@ if(XERENGE_SHADER_CACHE_BOOTSTRAP_CPP)
     message(STATUS "rexgpu-plume: linking bootstrap shader cache ${XERENGE_SHADER_CACHE_BOOTSTRAP_CPP}")
 endif()
 
-add_library(rexgpu-plume SHARED ${REXGPU_PLUME_SOURCES})
+if(XERENGE_PS5)
+    # One eboot.bin: the renderer is linked in (rex::system::LoadGpuPlugin).
+    add_library(rexgpu-plume STATIC ${REXGPU_PLUME_SOURCES})
+else()
+    add_library(rexgpu-plume SHARED ${REXGPU_PLUME_SOURCES})
+endif()
 set_target_properties(rexgpu-plume PROPERTIES
     CXX_VISIBILITY_PRESET hidden
     VISIBILITY_INLINES_HIDDEN ON
@@ -293,7 +301,11 @@ if(XERENGE_SHADER_CACHE_CPP)
     target_compile_definitions(rexgpu-plume PRIVATE XERENGE_HAS_SHADER_CACHE=1)
 endif()
 
-rexglue_setup_target(burnout GPU_PLUGINS xenos plume)
+if(XERENGE_PS5)
+    rexglue_setup_target(burnout)
+else()
+    rexglue_setup_target(burnout GPU_PLUGINS xenos plume)
+endif()
 
 # rex/rex_app.h includes <imgui.h> publicly, but rex::runtime does not carry
 # imgui's include directory to consumers, so a project that uses the app
@@ -335,8 +347,10 @@ target_link_libraries(ealobby-core PUBLIC Threads::Threads)
 if(WIN32)
   target_link_libraries(ealobby-core PUBLIC ws2_32)
 endif()
-add_executable(ealobby tools/ealobby/main.cpp)
-target_link_libraries(ealobby PRIVATE ealobby-core)
+if(NOT XERENGE_PS5)
+    add_executable(ealobby tools/ealobby/main.cpp)
+    target_link_libraries(ealobby PRIVATE ealobby-core)
+endif()
 # The game hosts a lobby itself when it finds none on the LAN (online_lobby.cpp).
 target_link_libraries(burnout PRIVATE ealobby-core)
 
@@ -348,4 +362,10 @@ if(CAPSTONE_LIBRARY AND CAPSTONE_INCLUDE_DIR)
     add_executable(xdis tools/xdis/main.cpp)
     target_include_directories(xdis PRIVATE "${CAPSTONE_INCLUDE_DIR}")
     target_link_libraries(xdis PRIVATE "${CAPSTONE_LIBRARY}")
+endif()
+
+# The PS5 is linked by port/ps5/tools/link.sh, not by CMake.
+if(XERENGE_PS5)
+    add_subdirectory(../port/ps5 port-ps5)
+    add_dependencies(burnout rexgpu-plume ealobby-core xerenge-ps5)
 endif()

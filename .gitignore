@@ -64,3 +64,8 @@ rexglue/tools/make_runtime_shader_recipe
 .claw/sessions/
 .clawhip/
 rexglue/build-lobby/
+
+# PS5 port: local inputs and logs
+.DS_Store
+/source/
+/logs/

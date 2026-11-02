@@ -164,6 +164,167 @@ uint32_t GuestCString(uint8_t* base, const char* text) {
   return at;
 }
 
+// A guest string in the interface's own form: UTF-16, big-endian.
+uint32_t GuestWideCString(uint8_t* base, const char* text) {
+  const size_t length = std::strlen(text);
+  const uint32_t at = REX_KERNEL_MEMORY()->SystemHeapAlloc(uint32_t(length + 1) * 2, 0x10);
+  uint8_t* out = xerenge::GuestPointer(base, at);
+  for (size_t c = 0; c <= length; ++c) {
+    out[c * 2] = 0;
+    out[c * 2 + 1] = uint8_t(text[c]);
+  }
+  return at;
+}
+
+bool IsGuestWide(const uint8_t* base, uint32_t address, const char* text) {
+  const uint8_t* in = xerenge::GuestPointer(base, address);
+  for (size_t c = 0;; ++c) {
+    if (in[c * 2] != 0 || in[c * 2 + 1] != uint8_t(text[c])) {
+      return false;
+    }
+    if (!text[c]) {
+      return true;
+    }
+  }
+}
+
+std::u16string ReadGuestWide(const uint8_t* base, uint32_t address) {
+  std::u16string text;
+  const uint8_t* in = xerenge::GuestPointer(base, address);
+  for (size_t c = 0; c < 4096; ++c) {
+    const char16_t ch = char16_t((uint16_t(in[c * 2]) << 8) | in[c * 2 + 1]);
+    if (!ch) {
+      break;
+    }
+    text.push_back(ch);
+  }
+  return text;
+}
+
+uint32_t GuestWideString(uint8_t* base, const std::u16string& text) {
+  const uint32_t at = REX_KERNEL_MEMORY()->SystemHeapAlloc(uint32_t(text.size() + 1) * 2, 0x10);
+  uint8_t* out = xerenge::GuestPointer(base, at);
+  for (size_t c = 0; c <= text.size(); ++c) {
+    const char16_t ch = c < text.size() ? text[c] : 0;
+    out[c * 2] = uint8_t(ch >> 8);
+    out[c * 2 + 1] = uint8_t(ch);
+  }
+  return at;
+}
+
+char16_t LowerAscii(char16_t c) {
+  return c >= u'A' && c <= u'Z' ? char16_t(c - u'A' + u'a') : c;
+}
+
+bool MatchAt(const std::u16string& text, size_t at, const char16_t* pattern) {
+  for (size_t i = 0; pattern[i]; ++i) {
+    if (at + i >= text.size() || LowerAscii(text[at + i]) != pattern[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool AllUpper(const std::u16string& text, size_t at, size_t length) {
+  for (size_t i = 0; i < length; ++i) {
+    const char16_t c = text[at + i];
+    if (c >= u'a' && c <= u'z') {
+      return false;
+    }
+  }
+  return true;
+}
+
+void ReplaceAll(std::u16string& text, const char16_t* from, const char16_t* to,
+                const char16_t* upper_to = nullptr) {
+  const size_t length = std::char_traits<char16_t>::length(from);
+  for (size_t at = 0; at + length <= text.size();) {
+    if (!MatchAt(text, at, from)) {
+      ++at;
+      continue;
+    }
+    const char16_t* replacement = upper_to && AllUpper(text, at, length) ? upper_to : to;
+    text.replace(at, length, replacement);
+    at += std::char_traits<char16_t>::length(replacement);
+  }
+}
+
+bool HasCyrillic(const std::u16string& text) {
+  return std::any_of(text.begin(), text.end(), [](char16_t c) { return c >= 0x400 && c < 0x500; });
+}
+
+bool HasLower(const std::u16string& text) {
+  return std::any_of(text.begin(), text.end(), [](char16_t c) {
+    return (c >= u'a' && c <= u'z') || (c >= 0x430 && c < 0x460);
+  });
+}
+
+bool IsLetter(char16_t c) {
+  return (c >= u'A' && c <= u'Z') || (c >= u'a' && c <= u'z') || (c >= 0x400 && c < 0x500);
+}
+
+// The word as it is written, not inside another: START, not RESTART.
+void ReplaceWord(std::u16string& text, const char16_t* from, const char16_t* to) {
+  const std::u16string word(from);
+  for (size_t at = text.find(word); at != std::u16string::npos; at = text.find(word, at)) {
+    const size_t end = at + word.size();
+    if ((at > 0 && IsLetter(text[at - 1])) || (end < text.size() && IsLetter(text[end]))) {
+      at = end;
+      continue;
+    }
+    text.replace(at, word.size(), to);
+    at += std::char_traits<char16_t>::length(to);
+  }
+}
+
+// The title says Xbox in a few dozen places: the live service, the console,
+// the guide and the dashboard. On this port they are the PlayStation's, and
+// the same action stays behind the name. The replacement is shorter than what
+// it replaces, so a movie's layout keeps its room. A localisation's text is
+// given its own language's word: "сети" fits its sentences (в, к, от сети),
+// ОНЛАЙН a heading.
+//
+// With the PlayStation's icons, the START a prompt names is OPTIONS: only in a
+// sentence (a text with small letters), as the game's own terms - BOOST START,
+// FAST START! - are written in capitals and are not the button.
+std::u16string ForThisPort(std::u16string text) {
+#ifdef XERENGE_PS5
+  if (HasCyrillic(text)) {
+    ReplaceAll(text, u"xbox live", u"сети", u"ОНЛАЙН");
+  } else {
+    ReplaceAll(text, u"xbox live", u"Online", u"ONLINE");
+  }
+  ReplaceAll(text, u"xbox 360", u"PS5");
+  ReplaceAll(text, u"xbox360", u"PS5");
+  ReplaceAll(text, u"xbox", u"PS5");
+#endif
+  static const bool playstation = [] {
+    const char* prompts = std::getenv("XERENGE_PROMPTS");
+    return prompts && std::strcmp(prompts, "playstation") == 0;
+  }();
+  if (playstation && HasLower(text)) {
+    ReplaceWord(text, u"START", u"OPTIONS");
+  }
+  return text;
+}
+
+uint32_t PortText(uint8_t* base, uint32_t address) {
+  static std::map<std::u16string, uint32_t> replaced;
+  std::u16string text = ReadGuestWide(base, address);
+  const std::u16string original = text;
+  text = ForThisPort(std::move(text));
+  if (text == original) {
+    return address;
+  }
+  const auto found = replaced.find(text);
+  if (found != replaced.end()) {
+    return found->second;
+  }
+  const uint32_t out = GuestWideString(base, text);
+  replaced.emplace(text, out);
+  return out;
+}
+
 void Register(PPCContext& ctx, uint8_t* base, uint32_t object, const char* name, uint32_t function) {
   static auto* names = new std::map<std::string, uint32_t>;
   uint32_t& guest_name = (*names)[name];
@@ -420,6 +581,9 @@ REX_HOOK_RAW(sub_821E6BA8) {
   if (requested) {
     static std::string on_show;
     const std::string next = GuestString(base, requested);
+    if (next != on_show) {
+      REXLOG_INFO("menu: show '{}'", next);
+    }
     g_on_settings = IsSettings(next);
     g_on_main_menu = next.size() >= 14 && next.compare(next.size() - 14, 14, "/Main/MainMenu") == 0;
     xerenge::music::SetSongManagerShown(next.size() >= 19 &&
@@ -483,7 +647,7 @@ REX_HOOK_RAW(sub_8210FCF8) {
   // A localisation mod's text first (mods.cpp).
   if (ctx.r4.u32 >= 0x10000) {
     if (const uint32_t text = xerenge::mods::Text(base, key)) {
-      ctx.r3.u64 = text;
+      ctx.r3.u64 = PortText(base, text);
       return;
     }
   }
@@ -561,6 +725,9 @@ REX_HOOK_RAW(sub_8210FCF8) {
     }
   }
   __imp__sub_8210FCF8(ctx, base);
+  if (ctx.r3.u32 >= 0x10000) {
+    ctx.r3.u64 = PortText(base, ctx.r3.u32);
+  }
 }
 
 // The interface taking a popup's text and buttons.

@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cctype>
 #include <cstdlib>
+#include <cstring>
 #include <deque>
 #include <iterator>
 #include <ctime>
@@ -143,6 +144,13 @@ struct Setting {
 
 std::vector<Option> OffOn() { return {{"OFF", "false"}, {"ON", "true"}}; }
 
+// What the port started with: the PS5 sets the PlayStation prompts in its
+// startup, so the page must show them rather than the file's default.
+int PromptDefault() {
+  const char* prompts = std::getenv("XERENGE_PROMPTS");
+  return prompts && std::strcmp(prompts, "playstation") == 0 ? 1 : 0;
+}
+
 bool g_single_language = false;
 bool g_restart = false;
 // Set at the start (ApplyAtStart): the game runs in English under a
@@ -274,7 +282,7 @@ const std::vector<Setting>& Settings() {
     // The button icons: the game's own (the Xbox 360 pad's), or the PlayStation
     // set (plume_prompts.cpp).
     s.push_back({34, kDebug, "BUTTON ICONS", "prompts",
-                 {{"XBOX", "xbox"}, {"PLAYSTATION", "playstation"}}, 0});
+                 {{"XBOX", "xbox"}, {"PLAYSTATION", "playstation"}}, PromptDefault()});
     return s;
   }();
   return settings;

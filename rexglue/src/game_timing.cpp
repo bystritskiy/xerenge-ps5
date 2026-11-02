@@ -205,6 +205,30 @@ REX_HOOK_RAW(sub_82363E68) {
                   LoadU32(base, timer + 0x2C));
     }
   }
+  // XERENGE_TIMING_LOG: the title's own account of how fast its world advances,
+  // against the host's wall clock. The two are the test for "runs too fast".
+  {
+    static const bool timing_log = std::getenv("XERENGE_TIMING_LOG") != nullptr;
+    static auto last = std::chrono::steady_clock::now();
+    static uint32_t last_steps = 0;
+    static uint64_t last_time = 0;
+    if (timing_log && timer >= 0x10000 && timer < 0xA0000000u) {
+      const auto now = std::chrono::steady_clock::now();
+      const double seconds = std::chrono::duration<double>(now - last).count();
+      if (seconds >= 1.0) {
+        const double period = double(LoadU64(base, timer + 0x20));
+        const uint32_t steps = LoadU32(base, timer + 0x2C);
+        const uint64_t accumulated = LoadU64(base, timer + 0x10);
+        REXLOG_INFO("game timing: {:.2f} steps/s run, {:.2f} steps/s accumulated, period {} ticks, {} steps",
+                    (steps - last_steps) / seconds,
+                    period > 0.0 ? (double(int64_t(accumulated - last_time)) / period) / seconds : 0.0,
+                    period, steps);
+        last = now;
+        last_steps = steps;
+        last_time = accumulated;
+      }
+    }
+  }
 }
 
 extern "C" void __imp__sub_824288F8(PPCContext& __restrict, uint8_t*);

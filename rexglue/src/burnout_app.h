@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <rex/cvar.h>
 #include <rex/logging.h>
 #include <rex/rex_app.h>
 
@@ -12,6 +13,10 @@
 #include "xerenge_settings.h"
 
 void XerengeAchievementToastStart();
+
+#ifdef XERENGE_PS5
+REXCVAR_DECLARE(std::string, game_data_root);
+#endif
 
 class BurnoutApp : public rex::ReXApp {
  public:
@@ -23,7 +28,28 @@ class BurnoutApp : public rex::ReXApp {
         PPCImageConfig));
   }
 
-  void OnPreSetup(rex::RuntimeConfig&) override { xerenge::settings::ApplyAtStart(); }
+  void OnPreSetup(rex::RuntimeConfig& config) override {
+    xerenge::settings::ApplyAtStart();
+#ifdef XERENGE_PS5
+    config.gpu_plugin = "plume";
+#else
+    (void)config;
+#endif
+  }
+
+#ifdef XERENGE_PS5
+  // No arguments on the console: the disc's files and the saves have one place.
+  void OnConfigurePaths(rex::PathConfig& paths) override {
+    if (paths.game_data_root.empty()) {
+      paths.game_data_root = "/data/xerenge/game";
+    }
+    // The mods, the language and xerenge.conf find the game by the cvar, as the
+    // other platforms' --game_data_root sets it; OnPreSetup comes after this.
+    REXCVAR_SET(game_data_root, paths.game_data_root.string());
+    paths.user_data_root = "/data/xerenge/user";
+    paths.cache_root = "/data/xerenge/cache";
+  }
+#endif
 
   // Which build this is, first in the log: a report then says it by itself.
   void OnPostInitLogging() override { REXLOG_INFO("Xerenge {} ({})", XERENGE_VERSION, XERENGE_COMMIT); }

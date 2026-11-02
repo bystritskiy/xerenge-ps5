@@ -19,7 +19,7 @@
 namespace xerenge {
 
 inline constexpr uint32_t PhysicalHostOffset(uint32_t address) {
-#if REX_PLATFORM_WIN32 || (REX_PLATFORM_MAC && REX_ARCH_ARM64)
+#if REX_PLATFORM_WIN32 || REX_PLATFORM_PS5 || (REX_PLATFORM_MAC && REX_ARCH_ARM64)
   return address >= 0xE0000000u ? 0x1000u : 0u;
 #else
   (void)address;

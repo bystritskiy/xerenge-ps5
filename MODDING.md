@@ -108,7 +108,7 @@ A localisation mod puts its own text in place of the game's, and its own fonts
 in place of the game's fonts - for a language the game was never released in.
 
 ```
-Version = 0.1
+Version = 0.2
 Type = Localization
 Name = Russian
 
@@ -295,7 +295,7 @@ to have everything made again.
 `burnout.log` says what was found and done - lines starting with `mods:`:
 
 ```
-mods: locale_rus (Russian, version 0.1)
+mods: locale_rus (Russian, version 0.2)
 mods: 412 strings from .../mods/locale_rus/locale_rus.txt
 mods: locale_rus: Big made of Big.fnt (1060864 bytes)
 mods: the game's Language/Fonts/Big.bin is mods/locale_rus/.cache/Big.bin ...

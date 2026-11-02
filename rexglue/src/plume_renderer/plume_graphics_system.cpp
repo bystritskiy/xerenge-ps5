@@ -250,6 +250,10 @@ void UseAndroidCustomVulkanDriver() {
 #endif
 }  // namespace
 
+#if defined(XERENGE_PS5)
+extern "C" PFN_vkVoidFunction vk_icdGetInstanceProcAddr(VkInstance, const char*);
+#endif
+
 PlumeGraphicsSystem::PlumeGraphicsSystem() {
   draw_ring_.resize(kDrawRingSize);
 }
@@ -294,6 +298,10 @@ bool PlumeGraphicsSystem::InitializePlumeDevice() {
 
 #if defined(__ANDROID__)
   UseAndroidCustomVulkanDriver();
+#endif
+#if defined(XERENGE_PS5)
+  // No loader on the console: RADV is linked in, and this is its entry point.
+  plume::SetVulkanGetInstanceProcAddr(vk_icdGetInstanceProcAddr);
 #endif
   render_interface_ = std::make_unique<plume::VulkanInterface>();
   if (!render_interface_ || !render_interface_->isValid()) {
