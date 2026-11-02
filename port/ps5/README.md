@@ -55,14 +55,12 @@ Saves are in `/data/xerenge/user/`, settings in `/data/xerenge/xerenge.conf`,
 logs in `/data/xerenge/logs/`. **To update,** copy the new `PPSA92006` folder over
 the old one: saves, settings and game files are kept.
 
-### Russian translation
+### Mods
 
-The Russian translation, with fonts of its own, is a mod in this repository:
-[`rexglue/mods/locale_rus`](../../rexglue/mods/locale_rus). Copy that folder to
-`/data/xerenge/game/mods/locale_rus/` on the console. With no language chosen
-yet, the game starts in Russian; otherwise choose РУССКИЙ in **Driver Details >
-Settings > LANGUAGE** and restart the game once when it offers to.
-[MODDING.md](../../MODDING.md) has how translations work.
+Mods go in `/data/xerenge/game/mods/`, as on the other platforms: a translation
+(this repository has [`rexglue/mods/locale_rus`](../../rexglue/mods/locale_rus))
+is chosen in **Driver Details > Settings > LANGUAGE**.
+[MODDING.md](../../MODDING.md) has how they work.
 
 ## Playing
 
