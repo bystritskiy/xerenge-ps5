@@ -17,4 +17,10 @@ std::string LobbyServerAddress();
 // Blocking, for a few seconds at most.
 std::string HttpGet(const std::string& host_port, const std::string& path);
 
+#ifdef XERENGE_PS5
+// The console has no launcher: xerenge.conf's online, lobby_server and
+// gamertag are made the switches it would pass. Before the setup.
+void ApplyConf();
+#endif
+
 }  // namespace xerenge::online

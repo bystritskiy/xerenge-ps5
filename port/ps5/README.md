@@ -70,6 +70,20 @@ own); OPTIONS is the Xbox's START. The game's menus, races, Crash mode and
 replays are those of the PC and Mac builds; their settings are under **Driver
 Details > Settings** (GRAPHICS, HACKS, DEBUG).
 
+**Online** (the main menu's ONLINE) plays on the community server,
+`94639.snk.wtf`, with the players of the other platforms; the name shown to
+them is the console's user name. Both are keys of `xerenge.conf`, as the
+installer writes them on a computer:
+
+```ini
+# The name shown to others online (empty: the console's user name)
+gamertag = Player1
+# The online server (host or IP); empty: no server
+lobby_server = 94639.snk.wtf
+# With no server: the copies on one network find each other's games
+online = false
+```
+
 Report a problem with the log from `/data/xerenge/logs/`
 ([CONTRIBUTING.md](../../CONTRIBUTING.md) says what a report needs).
 

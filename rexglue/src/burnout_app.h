@@ -32,6 +32,7 @@ class BurnoutApp : public rex::ReXApp {
     xerenge::settings::ApplyAtStart();
 #ifdef XERENGE_PS5
     config.gpu_plugin = "plume";
+    xerenge::online::ApplyConf();
 #else
     (void)config;
 #endif

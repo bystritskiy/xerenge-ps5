@@ -203,6 +203,54 @@ index 0c39a42..ae71bc0 100644
  #endif
    int MapViews(uint8_t* mapping_base);
    void UnmapViews();
+diff --git a/include/rex/system/xsocket.h b/include/rex/system/xsocket.h
+index 5ad3441..53edcd9 100644
+--- a/include/rex/system/xsocket.h
++++ b/include/rex/system/xsocket.h
+@@ -29,12 +29,19 @@ struct N_XSOCKADDR {
+   N_XSOCKADDR() {}
+   N_XSOCKADDR(const XSOCKADDR* other) { *this = *other; }
+   N_XSOCKADDR& operator=(const XSOCKADDR& other) {
+-    address_family = other.address_family;
++    address_family = decltype(address_family)(other.address_family);
+     std::memcpy(sa_data, other.sa_data, rex::countof(sa_data));
+     return *this;
+   }
+ 
++#if REX_PLATFORM_PS5
++  // The BSD layout: a length byte, then the family's. The 16-bit family read
++  // there would be AF_UNSPEC, which the console's kernel refuses (EAFNOSUPPORT).
++  uint8_t address_length = 16;
++  uint8_t address_family;
++#else
+   uint16_t address_family;
++#endif
+   char sa_data[14];
+ };
+ 
+@@ -56,7 +63,7 @@ struct N_XSOCKADDR_IN {
+   N_XSOCKADDR_IN() {}
+   N_XSOCKADDR_IN(const XSOCKADDR_IN* other) { *this = *other; }
+   N_XSOCKADDR_IN& operator=(const XSOCKADDR_IN& other) {
+-    sin_family = other.sin_family;
++    sin_family = decltype(sin_family)(other.sin_family);
+     sin_port = other.sin_port;
+     sin_addr = other.sin_addr;
+     std::memset(x_sin_zero, 0, sizeof(x_sin_zero));
+@@ -64,7 +71,13 @@ struct N_XSOCKADDR_IN {
+     return *this;
+   }
+ 
++#if REX_PLATFORM_PS5
++  // As N_XSOCKADDR's: the BSD layout.
++  uint8_t sin_length = 16;
++  uint8_t sin_family;
++#else
+   uint16_t sin_family;
++#endif
+   rex::be<uint16_t> sin_port;
+   rex::be<uint32_t> sin_addr;
+   // sin_zero is defined as __pad on Android, so prefixed here.
 diff --git a/include/rex/system/xthread.h b/include/rex/system/xthread.h
 index 5c22f06..a5c2a0b 100644
 --- a/include/rex/system/xthread.h
@@ -1188,7 +1236,7 @@ index 181ddd8..21e8aa0 100644
                        REXCVAR_GET(hid_mappings_file));
          } else {
 diff --git a/src/kernel/xam/xam_net.cpp b/src/kernel/xam/xam_net.cpp
-index acd9235..f7e4f05 100644
+index acd9235..aa24326 100644
 --- a/src/kernel/xam/xam_net.cpp
 +++ b/src/kernel/xam/xam_net.cpp
 @@ -52,7 +52,7 @@
@@ -1200,6 +1248,16 @@ index acd9235..f7e4f05 100644
  #include <arpa/inet.h>
  #include <netinet/in.h>
  #include <netinet/ip.h>
+@@ -1625,6 +1625,9 @@ u32 NetDll_connect_entry(u32 caller, u32 socket_handle, ppc_ptr_t<XSOCKADDR> nam
+   }
+   X_STATUS status = socket->Connect(&native_name, namelen);
+   if (XFAILED(status)) {
++    if (OnlineStub()) {
++      REXKRNL_INFO("--online wire: connect socket {:08X}: errno {}", socket_handle, errno);
++    }
+     SetLastSocketError();
+     return -1;
+   }
 diff --git a/src/kernel/xboxkrnl/xboxkrnl_threading.cpp b/src/kernel/xboxkrnl/xboxkrnl_threading.cpp
 index b6021b5..a7744dc 100644
 --- a/src/kernel/xboxkrnl/xboxkrnl_threading.cpp
@@ -1420,6 +1478,36 @@ index a62d6f3..2f3ad82 100644
  int Memory::MapViews(uint8_t* mapping_base) {
    assert_true(rex::countof(map_info) == rex::countof(views_.all_views));
    // 0xE0000000 4 KB offset is emulated via host_address_offset and on the CPU
+diff --git a/src/system/xsocket.cpp b/src/system/xsocket.cpp
+index 54b49b8..59ffe07 100644
+--- a/src/system/xsocket.cpp
++++ b/src/system/xsocket.cpp
+@@ -463,9 +463,22 @@ X_STATUS XSocket::IOControl(uint32_t cmd, uint8_t* arg_ptr) {
+     const int ret = ioctlsocket(SOCKET(native_handle_), FIONBIO, &enable);
+ #else
+     const int flags = fcntl(int(native_handle_), F_GETFL, 0);
+-    const int ret = flags < 0 ? -1
+-                              : fcntl(int(native_handle_), F_SETFL,
+-                                      value ? (flags | O_NONBLOCK) : (flags & ~O_NONBLOCK));
++    int ret = flags < 0 ? -1
++                        : fcntl(int(native_handle_), F_SETFL,
++                                value ? (flags | O_NONBLOCK) : (flags & ~O_NONBLOCK));
++#if REX_PLATFORM_PS5
++    // A title's socket refuses fcntl and FIONBIO (EACCES); Sony's SO_NBIO
++    // option (0x1200, libSceNet's SCE_NET_SO_NBIO) is the console's way.
++    if (ret < 0) {
++      const int fcntl_errno = errno;
++      int enable = value ? 1 : 0;
++      ret = setsockopt(int(native_handle_), SOL_SOCKET, 0x1200, &enable, sizeof(enable));
++      if (ret < 0) {
++        REXKRNL_WARN("--online wire: non-blocking refused: fcntl errno {}, SO_NBIO errno {}",
++                     fcntl_errno, errno);
++      }
++    }
++#endif
+ #endif
+     return ret < 0 ? X_STATUS_UNSUCCESSFUL : X_STATUS_SUCCESS;
+   }
 diff --git a/src/system/xthread.cpp b/src/system/xthread.cpp
 index bdffd4a..236d3a3 100644
 --- a/src/system/xthread.cpp
