@@ -523,7 +523,7 @@ bool Rebuild(const uint8_t* data, size_t data_size, const uint8_t* constants, si
       }
     }
     place(button_character, "xerenge_graphics_btn", kPauseButtonX, kPauseMainY[2],
-          button_row("GRAPHICS", 0, 2, false));
+          button_row(xerenge::settings::Localized("GRAPHICS"), 0, 2, false));
     std::vector<std::string> graphics;
     int tab = 3;
     float y = kPausePageFirstY;
@@ -583,7 +583,7 @@ bool Rebuild(const uint8_t* data, size_t data_size, const uint8_t* constants, si
       code.Op(0x52);
       code.Op(0x17);
       // gStdTitle.screen.setText("$PauseTitle", subtitle)
-      code.Push({to_graphics ? c.String("[GRAPHICS]") : c.String("$PauseSubOptions"), c.String("$PauseTitle"), c.Int(2),
+      code.Push({to_graphics ? c.String(xerenge::settings::Localized("[GRAPHICS]")) : c.String("$PauseSubOptions"), c.String("$PauseTitle"), c.Int(2),
                  c.String("gStdTitle")});
       code.Op(0x1C);
       code.Push({c.String("screen")});
@@ -772,7 +772,7 @@ bool Rebuild(const uint8_t* data, size_t data_size, const uint8_t* constants, si
     for (const Button& button : kButtons) {
       buttons.push_back({button.name, kXerengeOptionBase + button.page});
       place(button_character, button.name, kButtonX, y,
-            button_row(button.label, kXerengeOptionBase + button.page, tab++, false));
+            button_row(xerenge::settings::Localized(button.label), kXerengeOptionBase + button.page, tab++, false));
       y += kMainStep;
     }
   } else {
@@ -794,7 +794,7 @@ bool Rebuild(const uint8_t* data, size_t data_size, const uint8_t* constants, si
     // The page's name under DRIVER DETAILS, in place of [SETTINGS].
     for (auto& entry : c.entries) {
       if (entry.type == 1 && entry.text == "$FEDRIVERDETSETTING") {
-        entry.text = xerenge::settings::PageTitle(page);
+        entry.text = xerenge::settings::Localized(xerenge::settings::PageTitle(page));
       }
     }
   }

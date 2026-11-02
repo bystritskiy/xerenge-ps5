@@ -347,6 +347,14 @@ uint32_t Text(uint8_t* base, const char* key) {
   return guest;
 }
 
+bool HasText(const char* key) {
+  std::lock_guard<std::mutex> lock(g_mutex);
+  const Mod* mod = g_live_set ? g_live : ActiveLocalization();
+  if (!mod) return false;
+  if (!g_loaded || g_texts_mod != mod) LoadTexts(*mod);
+  return g_texts.count(locale::KeyHash(key)) != 0;
+}
+
 }  // namespace xerenge::mods
 
 // A font being loaded (sub_8210E1F0(loader, path, done flag, buffer, size,

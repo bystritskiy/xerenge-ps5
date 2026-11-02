@@ -30,6 +30,15 @@ Page CurrentPage();
 void SetPage(Page page);
 std::string PageTitle(Page page);
 
+// A word of the Settings pages as the movies take it: where the localisation in
+// use has a text for it - XerengeOpt_ and the word's letters and digits, "_"
+// between them (XerengeOpt_KEEP_16_9; XerengeTitle_ for a page's [TITLE]) -
+// that key with its $, which the string table answers; else the word itself.
+std::string Localized(const std::string& english);
+// The word a key Localized gave stands for: shown when the text in use has no
+// text for it any more (a language switched on the page). nullptr for another key.
+const std::string* EnglishFor(const std::string& key);
+
 // The American release has one language: no Language row there.
 void SetSingleLanguage(bool single);
 

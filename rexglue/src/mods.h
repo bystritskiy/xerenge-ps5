@@ -38,6 +38,8 @@ const Mod* ActiveLocalization();
 // The localisation mod's text for a string key (without its $), in guest
 // memory as the game reads strings (big-endian UTF-16); 0 when it has none.
 uint32_t Text(uint8_t* base, const char* key);
+// Whether it has one.
+bool HasText(const char* key);
 
 // At the start, before the game's files are mounted: the localisation mod's
 // fonts made (or found made) in its .cache/.

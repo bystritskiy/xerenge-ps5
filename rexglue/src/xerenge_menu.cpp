@@ -650,6 +650,17 @@ REX_HOOK_RAW(sub_8210FCF8) {
       ctx.r3.u64 = PortText(base, text);
       return;
     }
+    // A Settings word given as a key (settings::Localized) the text in use no
+    // longer has: the word itself.
+    if (const std::string* english = settings::EnglishFor(key)) {
+      static std::map<std::string, uint32_t> made;
+      uint32_t& guest = made[*english];
+      if (!guest) {
+        guest = GuestWideCString(base, english->c_str());
+      }
+      ctx.r3.u64 = guest;
+      return;
+    }
   }
   // An achievement's popup: its title and text, as they are now, each in a
   // buffer of its own, written again every time.

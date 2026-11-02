@@ -17,6 +17,7 @@
 #include <fstream>
 #include <functional>
 #include <map>
+#include <mutex>
 
 #include <rex/cvar.h>
 #include <rex/logging.h>
@@ -317,6 +318,9 @@ std::string Upper(std::string text) {
 
 }  // namespace
 
+std::mutex g_keys_mutex;
+std::map<std::string, std::string> g_keys;  // a key Localized gave -> its word
+
 Page CurrentPage() { return g_page; }
 void SetPage(Page page) { g_page = page; }
 void SetSingleLanguage(bool single) { g_single_language = single; }
@@ -338,15 +342,44 @@ std::string PageTitle(Page page) {
   }
 }
 
+std::string Localized(const std::string& english) {
+  const bool title = english.size() > 2 && english.front() == '[' && english.back() == ']';
+  std::string key = title ? "XerengeTitle" : "XerengeOpt";
+  bool gap = true;
+  for (const char ch : english) {
+    if (!std::isalnum(static_cast<unsigned char>(ch))) {
+      gap = true;
+      continue;
+    }
+    if (gap) {
+      key += '_';
+      gap = false;
+    }
+    key += char(std::toupper(static_cast<unsigned char>(ch)));
+  }
+  if (!mods::HasText(key.c_str())) {
+    return english;
+  }
+  std::lock_guard<std::mutex> lock(g_keys_mutex);
+  g_keys.emplace(key, english);
+  return "$" + key;
+}
+
+const std::string* EnglishFor(const std::string& key) {
+  std::lock_guard<std::mutex> lock(g_keys_mutex);
+  const auto found = g_keys.find(key);
+  return found == g_keys.end() ? nullptr : &found->second;
+}
+
 std::vector<Row> Rows(Page page) {
   std::vector<Row> rows;
   if (page == kPause) {
     // What changes without a restart, in the order the pause menu shows it.
     for (const int id : {15, 16, 14, 13}) {
       if (const Setting* s = Find(id)) {
-        Row row{s->label, {}, s->id};
+        Row row{Localized(s->label), {}, s->id};
         for (const Option& o : s->options) {
-          row.options.push_back(o.label);
+          row.options.push_back(Localized(o.label));
         }
         rows.push_back(std::move(row));
       }
@@ -357,9 +390,9 @@ std::vector<Row> Rows(Page page) {
     if (s.page != page || (g_single_language && s.key && std::string(s.key) == "language" && mods::Localizations().empty())) {
       continue;
     }
-    Row row{s.label, {}, s.id};
+    Row row{Localized(s.label), {}, s.id};
     for (const Option& o : s.options) {
-      row.options.push_back(o.label);
+      row.options.push_back(Localized(o.label));
     }
     rows.push_back(std::move(row));
   }

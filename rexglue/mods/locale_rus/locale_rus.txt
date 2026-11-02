@@ -3868,3 +3868,47 @@ OnlineTitleRecordsSelect = ОНЛАЙН
 OnlineTitleOptions = ОНЛАЙН
 OnlineTitlePartyRoom = ОНЛАЙН
 OnlineTitlePartyRoomNonHost = ОНЛАЙН
+
+# Xerenge's Settings pages: a row, an option or a button by its English word
+# (XerengeOpt_), a page's [TITLE] (XerengeTitle_) - MODDING.md. Language
+# names, numbers and the names of things (XBOX, RENDERDOC) stay as they are.
+XerengeOpt_LANGUAGE = ЯЗЫК
+XerengeOpt_ASK_AT_START = СПРОСИТЬ ПРИ ЗАПУСКЕ
+XerengeOpt_RUSSIAN = РУССКИЙ
+XerengeOpt_GRAPHICS = ГРАФИКА
+XerengeOpt_HACKS = ТВИКИ
+XerengeOpt_DEBUG = ОТЛАДКА
+XerengeTitle_GRAPHICS = [ГРАФИКА]
+XerengeTitle_HACKS = [ТВИКИ]
+XerengeTitle_DEBUG = [ОТЛАДКА]
+XerengeOpt_OFF = ВЫКЛ
+XerengeOpt_ON = ВКЛ
+XerengeOpt_KEEP_16_9 = СОХРАНЯТЬ 16:9
+XerengeOpt_RENDER_RESOLUTION = РАЗРЕШЕНИЕ РЕНДЕРА
+XerengeOpt_THE_WINDOW_S = КАК У ЭКРАНА
+XerengeOpt_ANISOTROPIC_FILTERING = АНИЗОТРОПНАЯ ФИЛЬТРАЦИЯ
+XerengeOpt_ANTI_ALIASING = СГЛАЖИВАНИЕ
+XerengeOpt_SHARPENING = РЕЗКОСТЬ
+XerengeOpt_LIGHT = СЛАБАЯ
+XerengeOpt_MEDIUM = СРЕДНЯЯ
+XerengeOpt_STRONG = СИЛЬНАЯ
+XerengeOpt_BLOOM = СВЕЧЕНИЕ
+XerengeOpt_BLUR = РАЗМЫТИЕ
+XerengeOpt_SPEED_COUNTER = СПИДОМЕТР
+XerengeOpt_MPH = МИЛЬ/Ч
+XerengeOpt_KPH = КМ/Ч
+XerengeOpt_GAME_FPS = FPS В ИГРЕ
+XerengeOpt_CRASH_FPS = FPS В КРЭШЕ
+XerengeOpt_COLOUR_GRADING = ЦВЕТОКОРРЕКЦИЯ
+XerengeOpt_AS_ON_THE_CONSOLE = КАК НА КОНСОЛИ
+XerengeOpt_HALF = НАПОЛОВИНУ
+XerengeOpt_ASYNCHRONOUS_PRESENTATION = АСИНХРОННЫЙ ВЫВОД
+XerengeOpt_EARLY_SUBMIT = РАННЯЯ ОТПРАВКА
+XerengeOpt_PACKED_VERTICES = УПАКОВАННЫЕ ВЕРШИНЫ
+XerengeOpt_REFLECTIONS_IN_TURNS = ОТРАЖЕНИЯ ПООЧЕРЁДНО
+XerengeOpt_DEBUG_LOGS = ОТЛАДОЧНЫЕ ЛОГИ
+XerengeOpt_POWER_MODE = РЕЖИМ ПИТАНИЯ
+XerengeOpt_STOCK = СТАНДАРТНЫЙ
+XerengeOpt_PERFORMANCE = ПРОИЗВОДИТЕЛЬНЫЙ
+XerengeOpt_FRAME_COUNTER = СЧЁТЧИК КАДРОВ
+XerengeOpt_BUTTON_ICONS = ИКОНКИ КНОПОК

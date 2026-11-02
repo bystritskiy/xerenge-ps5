@@ -180,6 +180,20 @@ where it is not:
 executable finds a few more.) Translate the lines you want and keep them in
 your text file; the template need not be shipped.
 
+**Xerenge's own Settings pages** (LANGUAGE, GRAPHICS, HACKS, DEBUG) are not
+in the game's files. A row, an option or a button is translated by its English
+word, `XerengeOpt_` and the word's letters and digits with `_` between them; a
+page's title in brackets by `XerengeTitle_`:
+
+```
+XerengeOpt_KEEP_16_9 = СОХРАНЯТЬ 16:9
+XerengeOpt_THE_WINDOW_S = КАК У ЭКРАНА
+XerengeOpt_OFF = ВЫКЛ
+XerengeTitle_GRAPHICS = [ГРАФИКА]
+```
+
+A word the file does not have stays in English.
+
 ### Fonts
 
 The game draws all of its text with four fonts:
