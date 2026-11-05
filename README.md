@@ -26,6 +26,10 @@
 > This project does not include or distribute copyrighted game files. Use a dump of your own original disc.
 > Please do not request or share game downloads here.
 
+> [!CAUTION]
+> **We do not support piracy.**
+> Please do not use this project with pirated copies of the game.
+
 ## What it is
 
 A PS5 port of [Xerenge](https://github.com/shipa-2/Xerenge) by Shipa Snake and contributors.
