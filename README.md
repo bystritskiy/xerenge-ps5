@@ -1,19 +1,9 @@
-# Xerenge
+<h1 align="center">Xerenge for PS5</h1>
 
-Bringing Burnout Revenge (Xbox 360, retail) up as a native binary: the game's
-PowerPC code is recompiled to C++ ahead of time and linked into an executable,
-with the console's hardware and operating system emulated around it. There is
-no CPU interpreter and no JIT.
-
-**Supported releases:** Burnout Revenge (Europe) and, since 0.4.7, Burnout
-Revenge (USA) - both officially, tested end to end: menus, races, Crash mode,
-replays, widescreen and the logo skip. Other dumps (the beta, other regions)
-are not.
-
-**On a PS5.** A native app for a homebrew-enabled PS5 (title PPSA92006), for
-the USA disc: [`port/ps5/README.md`](port/ps5/README.md) has how to install it
-and how it is built. You can also install the PS5 app from
-[RecompStore](https://recompstore.com/game/PPSA92006) or [ProsperoStore](https://prosperostore.net/app/PPSA92006/).
+<p align="center">
+  <b>Burnout Revenge, the Xbox 360 version, statically recompiled<br>
+  into a native app for homebrew-enabled PS5 consoles.</b>
+</p>
 
 <p align="center">
   <a href="https://recompstore.com/game/PPSA92006"><img src="https://img.shields.io/badge/Get_it_on-RecompStore-20d9d2?style=for-the-badge" alt="Get it on RecompStore" height="40"></a>
@@ -21,197 +11,129 @@ and how it is built. You can also install the PS5 app from
   <a href="https://prosperostore.net/app/PPSA92006/"><img src="https://img.shields.io/badge/Get_it_on-ProsperoStore-2563eb?style=for-the-badge" alt="Get it on ProsperoStore" height="40"></a>
 </p>
 
-## Getting it running
+<p align="center">
+  <a href="#install"><b>Install</b></a>
+  &nbsp;·&nbsp;
+  <a href="#controls">Controls</a>
+  &nbsp;·&nbsp;
+  <a href="#settings">Settings</a>
+  &nbsp;·&nbsp;
+  <a href="#reporting-a-bug">Report a bug</a>
+</p>
 
-You need a dump of the retail European or American release - the image
-hashing to `34c1bd4d549c2c53f29d814fa5e5d1c04c533c5ca0c39e57b6c2538f44ff59b4`
-(Europe) or `7abf689f52b70666ba92052bd157cfcae9ed6290dae298fbf639baa1d169f92b`
-(USA) - and a machine with Vulkan. The two are not the same build (the
-territory is compiled into the code), so each gets a game generated from its
-own `default.xex`; SETUP.md has the detail.
+> [!IMPORTANT]
+> **Bring your own game.**
+> This project does not include or distribute copyrighted game files. Use a dump of your own original disc.
+> Please do not request or share game downloads here.
 
-**With the installer.** `Burnout_Revenge_Installer-x86_64.AppImage` asks for the
-disc image, the install directory and three settings (bloom, motion blur, and
-which renderer), then does everything else itself: fetches this repository and
-its dependencies from GitHub, checks and extracts the image, builds the SDK and
-the title, translates the shaders, and creates a desktop shortcut and an
-applications menu entry. Nothing from the game is downloaded - it is all made
-from your disc, on your machine. The settings land in `xerenge.conf` in the
-install directory and are read at every start, so they can be changed there
-later - or in the game, under Driver Details > Settings (GRAPHICS, HACKS, DEBUG). To build the AppImage yourself: `rexglue/installer/make-appimage.sh`
-(needs Qt 6, linuxdeploy and linuxdeploy-plugin-qt). The payload carries the
-game twice, `bin/burnout_eu` and `bin/burnout_us`, and the installer installs
-the one for your disc as `bin/burnout`. CI builds the American one when its
-assets carry the American release's files (`game_us/` beside `game_eu/`); an
-installer made without them says so and installs the European disc only.
+## What it is
 
-**By hand.**
+A PS5 port of [Xerenge](https://github.com/shipa-2/Xerenge) by Shipa Snake and contributors.
+The game's PowerPC code is translated into C++ ahead of time, with ReXGlue providing the
+runtime and plume handling graphics through Vulkan. Other platforms are maintained upstream.
 
-```
-./scripts/bootstrap.sh /path/to/burnout-revenge.iso
-cd rexglue && ./run.sh
-```
+## Highlights
 
-The same works on a Mac with Apple silicon, and there is an installer app for
-it too; SETUP.md has what it needs. Intel Macs are not supported.
+- **Native PS5 app** with Vulkan rendering through RADV.
+- **DualSense controls** and PlayStation button prompts.
+- **Community online play**, including players on other platforms.
+- **In-game settings** for graphics, gameplay adjustments and debugging.
+- **Mod support**, including translations and replacement music.
 
-That verifies the image, extracts it, builds the SDK and builds the title.
-[`SETUP.md`](SETUP.md) covers the steps separately, what each one does, and what
-to do when something goes wrong. The scripts are:
+## Requirements
 
-| | |
+- A homebrew-enabled PS5 with ShadowMountPlus and an FTP server.
+  The documented test firmware is 13.40.
+- A dump of your own **USA Xbox 360 disc** of *Burnout Revenge*, with image SHA-256
+  `7abf689f52b70666ba92052bd157cfcae9ed6290dae298fbf639baa1d169f92b`.
+  The PS5 build requires this release; upstream's European-disc support does not apply here.
+- About **4 GB free** for the extracted disc files.
+
+## Install
+
+Install the app from [RecompStore](https://recompstore.com/game/PPSA92006) or
+[ProsperoStore](https://prosperostore.net/app/PPSA92006/), or use the manual steps below.
+Both methods require your own disc files.
+
+1. **The app.** Download `Xerenge-PS5-<version>.zip` from [Releases](../../releases/latest).
+   Extract its `PPSA92006` folder to `/data/homebrew/` on the console.
+2. **Your disc.** Extract the disc image with `scripts/extract-image` or `extract-xiso -x`.
+   Copy all files to `/data/xerenge/game/`, with `default.xex` beside `data/`, `fe/`,
+   `language/` and the remaining disc folders.
+3. **Play.** Start the **Xerenge** tile.
+
+**To update,** replace the `PPSA92006` app folder. Saves, settings and game files are kept separately.
+See the [PS5 guide](port/ps5/README.md#installing) for extraction and upload commands.
+
+## Controls
+
+The DualSense follows the Xbox 360 controller layout by button position.
+
+| Xbox 360 | DualSense |
 |---|---|
-| `scripts/check-prerequisites.sh` | says what is missing before a build can fail halfway |
-| `scripts/extract-image` | reads the disc image directly; XDVDFS, which ordinary tools do not open (built by `scripts/build-tools.sh`) |
-| `scripts/setup-sdk.sh` | fetches and builds the recompiler and system layer |
-| `scripts/setup-deps.sh` | fetches plume and XenosRecomp (our forks) and builds the shader translator |
-| `scripts/build.sh` | points the manifest at your game directory, generates the code, translates the shaders and builds |
-| `scripts/bootstrap.sh` | all of the above, in order |
-| `scripts/inspect-capture.sh` | reads a RenderDoc capture offline: passes, the draw behind a given pixel, full state, textures |
-| `rexglue/run.sh` | runs it, with the flags that are not optional and a log per run |
-| `rexglue/installer/` | the Qt 6 installer and the script that packs it into an AppImage |
+| A / B / X / Y | Cross / Circle / Square / Triangle |
+| LB / RB | L1 / R1 |
+| LT / RT | L2 / R2 |
+| Start | Options |
 
-### Shaders
+PlayStation button icons are enabled in the game. **Settings → DEBUG → BUTTON ICONS**
+switches back to the original icons.
 
-The title's shaders are its own code, so none are kept here: the build
-translates them from your copy of the game. Most are found by scanning the
-executable. The rest the title assembles while it runs - a shader from the
-executable, or from a `graphics/*.obj` file on the disc, with a few
-vertex-fetch instructions patched to match the vertex layout. Those are rebuilt
-from the disc by the recipe in `rexglue/tools/runtime_shaders.recipe`, which
-holds only hashes and patch masks, and each result is checked against its hash.
-So every shader is there from the first frame, without running the game once to
-collect them. `rexglue/tools/make_runtime_shader_recipe` (built by
-`scripts/build-tools.sh`) refreshes the recipe from the shaders a run dumps
-(`XERENGE_DUMP_UCODE=1`).
+## Settings
 
-## Plume
+Open **Driver Details → Settings** for GRAPHICS, HACKS, DEBUG and LANGUAGE.
+Settings are stored in `/data/xerenge/xerenge.conf`.
 
-Burnout Revenge draws through **plume**, this project's own GPU plugin
-([`rexglue/src/plume_renderer/`](rexglue/src/plume_renderer/), the default
-everywhere `./run.sh` runs it), on top of
-[ReXGlue](https://github.com/rexglue/rexglue-sdk) through our fork
-[rexglue-xerenge](https://github.com/shipa-2/rexglue-xerenge). The project
-itself - manifest, function boundaries, app skeleton, build glue - is in
-[`rexglue/`](rexglue/), with the detail in
-[`rexglue/README.md`](rexglue/README.md).
+**Online:** choose ONLINE from the main menu to use the community lobby at `94639.snk.wtf`.
+The displayed player name defaults to the console user name. The server and player name can
+be changed in the configuration file; see the [online settings](port/ps5/README.md#playing).
 
-Instead of emulating the Xenos command processor, plume takes the title's
-Direct3D calls directly and draws with them. That one difference is where
-most of what makes this build solid and fast comes from:
+**Mods:** put them in `/data/xerenge/game/mods/`. Select a translation under
+**Driver Details → Settings → LANGUAGE**. See [MODDING.md](MODDING.md).
 
-* **No GPU state caches to keep correct.** A command-processor emulator needs
-  a texture cache for every Xenos format, an EDRAM render-target cache, and a
-  shader cache kept in step with whatever the title binds. Drawing from the
-  D3D calls directly needs none of that - the host GPU driver already does it.
-* **Shaders are translated ahead of time**, not recompiled at runtime, so
-  there is no JIT warm-up and no stutter the first time the title hits a new
-  one.
-* **Render targets are real host textures**, read back directly rather than
-  reconstructed from an emulated EDRAM layout.
-* **The frame's CPU work is spread out** - texture checks, vertex unpacking -
-  over up to eight worker threads, instead of one emulation thread carrying
-  all of it.
-* **It runs everywhere Vulkan does**, from a desktop GPU down to a phone's,
-  without a software GPU emulator in the way.
+## Your files
 
-A second GPU plugin, **xenos** (`./run.sh --xenos`, the installer's "xenia
-render") - ReXGlue's port of Xenia's GPU emulation, with shader translation at
-runtime - is kept as the reference for when plume draws something
-differently, and as how the project's earlier line, `legacy`
-([`XerengeRuntime/`](XerengeRuntime/) on
-[XenonRecomp-xerenge](https://github.com/shipa-2/XenonRecomp-xerenge) and
-[XenosRecomp-xerenge](https://github.com/shipa-2/XenosRecomp-xerenge), frozen
-but still buildable), proved that an early colour defect was in the recompiler
-and not the graphics pipeline, before the move to ReXGlue.
+| Files | Location |
+|---|---|
+| Extracted disc | `/data/xerenge/game/` |
+| Saves | `/data/xerenge/user/` |
+| Settings | `/data/xerenge/xerenge.conf` |
+| Logs | `/data/xerenge/logs/` |
 
-## Where it stands
+## Known issues
 
-The title is fully playable on both supported releases: it boots, reaches the
-title screen, loads a save, runs through car select, and races render at
-60 fps. The audio is complete - engine sounds, crashes, the interface and the
-licensed soundtrack - and the intro videos play. The frontend, the videos and
-the 3D world are colour-correct. It runs on Linux, Windows, Android (phones
-with a Vulkan 1.0+ GPU) and macOS (Apple silicon).
+The plume renderer can occasionally flash a black frame or briefly display an incorrect texture.
+See the [PS5 guide](port/ps5/README.md) for platform-specific details.
+Upstream platform and performance claims do not establish the same behavior on PS5.
 
-All of it besides the disc image and the install path is a setting, not a
-patch: the installer and `xerenge.conf` cover them, and most are reachable
-from the running game too, under Driver Details > Settings (GRAPHICS, HACKS,
-DEBUG) - changing one there and confirming it offers a restart that applies
-it at once, without reinstalling.
+## Reporting a bug
 
-The game runs at its own pace, not the renderer's. Its logic steps on a fixed
-timer, and each frame is held to the console's 60 Hz vblank by default - 30
-fps in Crash mode, as on the console. A 30 fps lock (two logic steps a frame,
-everywhere) and frame generation (a frame drawn between each two of the
-game's, for 90-120 Hz screens, including through Crash mode's lock) are both
-shipped settings, off by default; `XERENGE_UNLOCK_FPS=1` instead lifts the cap
-entirely and lets the logic follow the wall clock.
+Open an [issue](../../issues) with the app version, firmware, reproduction steps and logs from
+`/data/xerenge/logs/`. Describe the expected and actual result. Do not attach game files or disc images.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for report details.
 
-Textures are loaded with their full mip chains from the title's memory, and
-sampled with the filtering and anisotropy the title asks for; on a GPU with no
-hardware texture compression (common on phones), they are re-encoded to ETC2
-once and cached, rather than decompressed every time.
+## For developers
 
-The frame can be anti-aliased and sharpened as it is presented
-(`plume_postfx.cpp`): FXAA, after NVIDIA's FXAA 3.11, or SMAA 1x, and AMD's
-FidelityFX CAS, full-screen passes from the scene target through intermediate
-targets, then the usual copy onto the window. SMAA is the reference
-implementation of Jimenez, Echevarria, Masia, Navarro and Gutierrez (MIT
-licence, `rexglue/thirdparty/smaa`) at its HIGH preset, with edges found from
-luma: three passes - edges, blending weights from its two lookup tables, the
-blend - where FXAA is one. All are off by default - the console had none of
-them, and with them off nothing is recorded. Colour grade, brightness and
-shadow lift are adjustable too, live, over the console's own look. The
-settings are live (read once a frame); `XERENGE_AA` and `XERENGE_SHARPEN` set
-where they start.
+See the [PS5 build and packaging guide](port/ps5/README.md#building-macos-host).
+[SETUP.md](SETUP.md) and the [runtime overview](rexglue/README.md) cover the upstream build.
 
-The frame is drawn at the window's resolution rather than the console's 720p,
-and the copies of it the post-processing reads are kept at that size. A pass
-that shrinks a copy further - the bloom's first step, 1280x720 into 320x180 -
-samples it with offsets made for 720p, and at a higher resolution it would
-catch a different few pixels of each block every frame: small highlights
-flickered through the glare and the whole picture shimmered. Such a copy is
-filtered down to its guest size first (halved while a half covers it, then
-the last step), at any window size and shape.
+## Credits
 
-**Online.** `ealobby`, a lobby server standing in for EA's, is already
-pointed at by default (a self-hosted one), so online play works without
-running anything yourself; a self-hosted server also carries the Locker
-(Burnout Clips: saving, sharing and recommending replays, the top 20 and
-recent-players rankings) and serves the game's News screen the latest
-release's notes. Running your own `ealobby` instead is one flag away for a
-LAN or a server of your own.
+- [Xerenge](https://github.com/shipa-2/Xerenge): Shipa Snake and contributors.
+- [ReXGlue SDK](https://github.com/rexglue/rexglue-sdk), plume and XenosRecomp,
+  through Xerenge's forks.
+- [PS5_Vulkan, PS5_Mesa and PS5_PayloadSDK](https://github.com/mihawk-99):
+  BlackBearReloaded, Mihawk-99 and the community projects they build on.
+- PS5 port: [bystritskiy](https://github.com/bystritskiy).
 
-**Achievements** are read from the title's own data and shown as it earns
-them - a notice drawn over the game without pausing it, and the full list
-with their descriptions under Player File > Stats.
+## License
 
-Open:
+Xerenge and this port are GPL-3.0-or-later ([LICENSE](LICENSE)). Third-party components retain
+their own terms; see [THIRD_PARTY_NOTICES.md](port/ps5/THIRD_PARTY_NOTICES.md).
+The license grants no rights to *Burnout Revenge* or its game data.
 
-* plume: a black frame still flashes very occasionally, and a texture
-  sometimes shows wrong for half a second during a race.
+## Legal notice
 
-## What is not here
-
-Game images, decrypted data, extracted assets, build directories and generated
-recompiler output are deliberately excluded, here and in the forks. The ReXGlue
-SDK is a separate checkout rather than vendored.
-
-## Mods
-
-Translations into languages the game was never released in - with fonts of
-their own, drawn to look like the game's - and your own music in place of EA
-Trax: [`MODDING.md`](MODDING.md) has how.
-
-## Reporting a problem
-
-Read [CONTRIBUTING.md](CONTRIBUTING.md) first: a report needs the log, the
-version, the hardware and the steps to reproduce it.
-
-## Licence
-
-Xerenge's own code is under the GNU General Public License, version 3 or later
-([LICENSE](LICENSE)). The ReXGlue SDK and the third-party code under
-`rexglue/thirdparty` keep their own licences. Burnout Revenge itself is not
-covered: it is EA's and Criterion's, and you need your own disc to play.
+This is an unofficial fan port, independent of the upstream authors, Electronic Arts,
+Criterion Games, Microsoft and Sony Interactive Entertainment. Game and platform names
+are trademarks of their respective owners. See the [full notice](port/ps5/README.md#legal-notice).
