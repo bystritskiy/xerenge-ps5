@@ -32,7 +32,7 @@ plays the files of your own disc from the console's storage.
 
 ## Installing
 
-1. **The app.** Install it from a homebrew store (RecompStore, Prospero Store),
+1. **The app.** Install it from [RecompStore](https://recompstore.com/game/PPSA92006) or [ProsperoStore](https://prosperostore.net/app/PPSA92006/),
    or download `Xerenge-PS5-<version>.zip` from the
    [Releases](https://github.com/bystritskiy/xerenge-ps5/releases) page and copy its `PPSA92006` folder to
    `/data/homebrew/` on the console, so that `eboot.bin` is at

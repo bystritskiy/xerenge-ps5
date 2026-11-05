@@ -12,7 +12,8 @@ are not.
 
 **On a PS5.** A native app for a homebrew-enabled PS5 (title PPSA92006), for
 the USA disc: [`port/ps5/README.md`](port/ps5/README.md) has how to install it
-and how it is built.
+and how it is built. You can also install the PS5 app from
+[RecompStore](https://recompstore.com/game/PPSA92006) or [ProsperoStore](https://prosperostore.net/app/PPSA92006/).
 
 <p align="center">
   <a href="https://recompstore.com/game/PPSA92006"><img src="https://img.shields.io/badge/Get_it_on-RecompStore-20d9d2?style=for-the-badge" alt="Get it on RecompStore" height="40"></a>
